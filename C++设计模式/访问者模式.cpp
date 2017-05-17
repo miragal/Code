@@ -2,20 +2,41 @@
 #include <vector> 
 using namespace std;
 
-class LibraryVisitor;
+class Library;//被访问者 
 
-class LibraryInterface{
+class Visitor{//访问者 
 	public:
-		virtual void accept(LibraryVisitor *lv)=0;
-		virtual void fun()=0;
-		~LibraryInterface(){
-			cout<<"this is LibraryInterface's xigou."<<endl;
+		virtual void visit(Library *t)=0;
+		~Visitor(){
+			cout<<"this is Visitor's xigou."<<endl;
 		}
 };
 
-class Book:public LibraryInterface{
+
+class Library{//被访问者 
 	public:
-		void accept(LibraryVisitor *lv);
+		void accept(Visitor *lv){
+			lv->visit(this);
+		} 
+		virtual void fun()=0;
+		~Library(){
+			cout<<"this is Library's xigou."<<endl;
+		}
+};
+
+
+class LibraryVisitor:public Visitor{
+	public:
+		void visit(Library *t){
+			t->fun();
+		}
+		~LibraryVisitor(){
+			cout<<"this is LibraryVisitor's xigou."<<endl;
+		}
+};
+
+class Book:public Library{
+	public:
 		void fun(){
 			cout<<"this is a book."<<endl;
 		}
@@ -24,9 +45,8 @@ class Book:public LibraryInterface{
 		}
 };
 
-class Article:public LibraryInterface{
+class Article:public Library{
 	public:
-		void accept(LibraryVisitor *lv);
 		void fun(){
 			cout<<"this is an article."<<endl;
 		}
@@ -35,47 +55,26 @@ class Article:public LibraryInterface{
 		}
 };
 
-class LibraryVisitor{
-	public:
-		virtual void visit(LibraryInterface *t)=0;
-		~LibraryVisitor(){
-			cout<<"this is LibraryVisitor's xigou."<<endl;
-		}
-};
-
-class LibrarySumPrintVisitor:public LibraryVisitor{
-	public:
-		void visit(LibraryInterface *t){
-			t->fun();
-		}
-		~LibrarySumPrintVisitor(){
-			cout<<"this is lspv's xigou."<<endl;
-		}
-};
 
 class Manager{
 	private:
-		vector <LibraryInterface *> vec;
+		vector <Library *> vec;
 	public:
-		void add(LibraryInterface *l){
+		void add(Library *l){
 			vec.push_back(l);
 		}
-		void request(LibraryVisitor *plv);
+		void request(Visitor *pv);
 };
 
-void LibraryInterface::accept(LibraryVisitor *lv){
-	lv->visit(this);
-}
-
-void Manager::request(LibraryVisitor *plv){
-	vector <LibraryInterface *> :: iterator it;
+void Manager::request(Visitor *pv){
+	vector <Library *> :: iterator it;
 	for(it=vec.begin();it!=vec.end();it++)
-		(*it)->accept(plv); 
+		(*it)->accept(pv); 
 }
 
 int main (void)
 {
-	LibrarySumPrintVisitor *pl=new LibrarySumPrintVisitor();
+	LibraryVisitor *pl=new LibraryVisitor();
 	Manager *pm=new Manager(); 
 	Book *pb=new Book();
 	Article *pa=new Article();
